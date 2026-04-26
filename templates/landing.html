@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Layora - What to wear, decided in seconds.</title>
+  <meta name="description" content="Layora gives you real-time outfit recommendations based on the weather at your location. Dress smarter every day.">
+  <link href="/static/style.css" rel="stylesheet">
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <a href="/about" class="nav-logo">Layora</a>
+    <div class="nav-actions">
+      <a href="/" class="nav-link">Open App</a>
+      <a href="/" class="nav-cta">Try it free →</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="lp-hero">
+
+    <div class="lp-eyebrow anim-fade-in">
+      <span class="lp-eyebrow-dot"></span>
+      Live weather · Smart outfits
+    </div>
+
+    <h1 class="lp-h1 anim-fade-up d1">
+      What to wear,<br>
+      <span class="grad">decided in seconds.</span>
+    </h1>
+
+    <p class="lp-sub anim-fade-up d2">
+      Layora reads real-time weather at your exact location and tells you exactly how to dress -
+      the right layers, the right look, for any occasion.
+    </p>
+
+    <div class="lp-cta-row anim-fade-up d3">
+      <a href="/" class="btn-primary">Open Layora →</a>
+      <a href="#how" class="btn-ghost">See how it works</a>
+    </div>
+
+    <!-- Floating app preview -->
+    <div class="lp-preview anim-scale-in d4">
+      <div class="lp-preview-inner">
+        <div class="lp-preview-row">
+          <span style="font-size:2.8rem;">🌤️</span>
+          <div>
+            <div class="lp-preview-temp">22°C</div>
+            <div class="lp-preview-info">Partly cloudy · Your location</div>
+          </div>
+        </div>
+        <div class="lp-preview-divider"></div>
+        <div class="lp-preview-layers">
+          <strong>1</strong> layer recommended
+        </div>
+        <div class="lp-preview-note">Light layer - long-sleeve or light jacket</div>
+        <div class="lp-preview-note" style="margin-top:.5rem;">Casual and comfortable clothing</div>
+        <div style="margin-top:1.125rem; display:flex; gap:.5rem; flex-wrap:wrap;">
+          <span style="font-size:.75rem; padding:.3rem .75rem; border-radius:50px; background:rgba(108,99,255,.15); border:1px solid rgba(108,99,255,.25); color:#b0aaff;">👕 Casual</span>
+          <span style="font-size:.75rem; padding:.3rem .75rem; border-radius:50px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); color:#7a85b0;">All styles</span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── Features ── -->
+  <section class="lp-section">
+    <div class="lp-section-header anim-fade-up">
+      <h2>Everything you need to<br>dress with confidence</h2>
+      <p>No guessing. No over-packing. Just the right outfit, right now.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card anim-fade-up d1">
+        <span class="feature-icon">🌍</span>
+        <h3>Live weather data</h3>
+        <p>
+          Pulls real-time temperature and conditions from Open-Meteo's global
+          forecast grid - accurate to your precise coordinates.
+        </p>
+      </div>
+      <div class="feature-card anim-fade-up d2">
+        <span class="feature-icon">🧠</span>
+        <h3>Smart layering logic</h3>
+        <p>
+          Our recommendation engine maps temperature, precipitation, and conditions
+          to a practical layering guide - no fluff, just what to wear.
+        </p>
+      </div>
+      <div class="feature-card anim-fade-up d3">
+        <span class="feature-icon">🎨</span>
+        <h3>Personalized to you</h3>
+        <p>
+          Refine by occasion - casual, formal, sport, or party - and style preference
+          to get suggestions that actually match your day.
+        </p>
+      </div>
+      <div class="feature-card anim-fade-up d1">
+        <span class="feature-icon">⚡</span>
+        <h3>Instant results</h3>
+        <p>
+          Your recommendation loads the moment the page opens. No forms to fill,
+          no sign-ups, no friction - just your outfit.
+        </p>
+      </div>
+      <div class="feature-card anim-fade-up d2">
+        <span class="feature-icon">🔒</span>
+        <h3>Privacy first</h3>
+        <p>
+          Your location is only used to fetch weather. It's never stored, logged,
+          or shared. You can also enter temperature manually.
+        </p>
+      </div>
+      <div class="feature-card anim-fade-up d3">
+        <span class="feature-icon">📡</span>
+        <h3>Open API</h3>
+        <p>
+          Need outfit recommendations in your own app? The Layora REST API is
+          fully documented and free to use.
+          <a href="/docs" style="color:#a5a0ff; text-decoration:none;"> See docs →</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How it works ── -->
+  <section class="lp-section" id="how" style="padding-top:1rem;">
+    <div class="lp-section-header anim-fade-up">
+      <h2>Three steps.<br>One perfect outfit.</h2>
+      <p>From page load to dressed - in under ten seconds.</p>
+    </div>
+
+    <div class="glass steps-grid">
+      <div class="step anim-fade-up d1">
+        <div class="step-num">Step 01</div>
+        <div class="step-icon">📍</div>
+        <h3>Share your location</h3>
+        <p>
+          Allow one-time location access, or type in a temperature and condition manually.
+          No account needed.
+        </p>
+      </div>
+      <div class="step anim-fade-up d2" style="border-left:1px solid var(--glass-border); border-right:1px solid var(--glass-border);">
+        <div class="step-num">Step 02</div>
+        <div class="step-icon">🌦️</div>
+        <h3>We read the weather</h3>
+        <p>
+          Layora fetches current temperature, weather code, and conditions from a
+          live global forecast API.
+        </p>
+      </div>
+      <div class="step anim-fade-up d3">
+        <div class="step-num">Step 03</div>
+        <div class="step-icon">👕</div>
+        <h3>Get your outfit</h3>
+        <p>
+          Receive a layering count, outfit type, and specific style notes - then
+          optionally refine by occasion or preference.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA band ── -->
+  <section class="lp-cta-band">
+    <div class="lp-cta-band-inner anim-scale-in">
+      <h2>Ready to dress smarter?</h2>
+      <p>Open Layora, allow location access, and get your outfit in seconds.</p>
+      <a href="/" class="btn-primary" style="font-size:1rem; padding:.95rem 2.25rem;">
+        Open Layora - it's free →
+      </a>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="lp-footer">
+    <div class="lp-footer-inner">
+      <div class="lp-footer-top">
+        <a href="/about" class="lp-footer-logo">Layora</a>
+        <div class="lp-footer-links">
+          <a href="/">Open App</a>
+          <a href="/docs">API Docs</a>
+          <a href="#how">How it works</a>
+        </div>
+      </div>
+      <div class="lp-footer-bottom">
+        <div class="lp-footer-credit">
+          Built with ♥ by <a href="https://github.com/jovialgeorge">Jovial</a>
+          &nbsp;·&nbsp;
+          <span id="yr"></span> Layora
+        </div>
+        <div class="lp-footer-tagline">
+          <span style="color:var(--accent);">●</span>
+          Powered by Open-Meteo
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear() + ' ©';
+
+    /* Simple scroll-triggered reveal */
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.animationPlayState = 'running';
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.anim-fade-up, .anim-scale-in, .anim-fade-in').forEach(el => {
+      el.style.animationPlayState = 'paused';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Layora - Dress for Today</title>
+  <meta name="description" content="Real-time outfit recommendations based on the weather at your location.">
+  <link href="/static/style.css" rel="stylesheet">
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <nav class="nav">
+    <a href="/" class="nav-logo">Layora</a>
+    <div class="nav-actions">
+      <a href="/about" class="nav-link">About</a>
+    </div>
+  </nav>
+
+  <main class="app-main">
+
+    <!-- Hero -->
+    <div class="app-hero anim-fade-up">
+      <h1>Dress smart<br><span class="grad">for today's weather.</span></h1>
+      <p>Your location, the forecast, your perfect outfit instantly.</p>
+    </div>
+
+    <!-- Loading state -->
+    <div id="loading-state" class="glass loading-card anim-fade-in">
+      <div class="spinner"></div>
+      <p id="loading-msg">Detecting your location…</p>
+    </div>
+
+    <!-- Manual / error state -->
+    <div id="error-state" class="glass error-card hidden">
+      <h3 id="err-title">Location unavailable</h3>
+      <p id="err-body">Allow location access or enter details below to get your outfit recommendation.</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Temperature (°C)</label>
+          <input type="number" id="m-temp" placeholder="e.g. 21" step="0.5">
+        </div>
+        <div class="form-group">
+          <label>Condition</label>
+          <select id="m-cond">
+            <option value="clear">☀️  Clear</option>
+            <option value="cloudy">☁️  Cloudy</option>
+            <option value="rain">🌧️  Rain</option>
+            <option value="snow">❄️  Snow</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="fetchManual()">Get my outfit →</button>
+    </div>
+
+    <!-- Weather widget -->
+    <div id="weather-widget" class="glass weather-widget hidden anim-fade-up">
+      <div class="w-icon" id="w-icon">🌤️</div>
+      <div>
+        <div class="w-temp" id="w-temp">—</div>
+        <div class="w-desc" id="w-desc">—</div>
+      </div>
+    </div>
+
+    <!-- Recommendation card -->
+    <div id="rec-card" class="glass rec-card hidden anim-fade-up d1">
+      <div class="rec-top">
+        <div class="rec-layers-block">
+          <span class="rec-num" id="r-layers">—</span>
+          <span class="rec-unit" id="r-unit">layers<br>recommended</span>
+        </div>
+        <span class="rec-badge" id="r-type">—</span>
+      </div>
+      <div id="r-notes"></div>
+    </div>
+
+    <!-- Refine section -->
+    <div id="refine-card" class="glass refine-card hidden anim-fade-up d2">
+      <div class="refine-title">
+        ✨ Refine your look <span>(optional)</span>
+      </div>
+
+      <div class="refine-group">
+        <div class="label">Occasion</div>
+        <div class="chip-group" id="occasion-chips">
+          <button class="chip active" data-val="Casual"  onclick="setChip('occasion', this)">👕 Casual</button>
+          <button class="chip"        data-val="Formal"  onclick="setChip('occasion', this)">👔 Formal</button>
+          <button class="chip"        data-val="Sport"   onclick="setChip('occasion', this)">🏃 Sport</button>
+          <button class="chip"        data-val="Party"   onclick="setChip('occasion', this)">🎉 Party</button>
+        </div>
+      </div>
+
+      <div class="refine-group">
+        <div class="label">Style preference</div>
+        <div class="chip-group" id="gender-chips">
+          <button class="chip active" data-val="other"  onclick="setChip('gender', this)">All styles</button>
+          <button class="chip"        data-val="male"   onclick="setChip('gender', this)">👨 Menswear</button>
+          <button class="chip"        data-val="female" onclick="setChip('gender', this)">👩 Womenswear</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-links">
+      <a href="/about">About Layora</a>
+      <a href="/docs">API Docs</a>
+    </div>
+    <p class="footer-credit">
+      Built with ♥ by <a href="https://github.com/jovialgeorge">Jovial</a>
+      &nbsp;·&nbsp; <span id="yr"></span>
+    </p>
+  </footer>
+
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    /* ── State ── */
+    const S = { lat: null, lon: null, manual_temp: null, manual_cond: null, occasion: 'Casual', sex: 'other' };
+
+    /* ── Weather code → [emoji, label] ── */
+    const WX = {
+      0:'☀️:Clear sky', 1:'🌤️:Mainly clear', 2:'⛅:Partly cloudy', 3:'☁️:Overcast',
+      45:'🌫️:Foggy', 48:'🌫️:Icy fog',
+      51:'🌦️:Light drizzle', 53:'🌦️:Drizzle', 55:'🌧️:Heavy drizzle',
+      56:'🌧️:Freezing drizzle', 57:'🌧️:Heavy freezing drizzle',
+      61:'🌧️:Light rain', 63:'🌧️:Rain', 65:'🌧️:Heavy rain',
+      66:'🌧️:Freezing rain', 67:'🌧️:Heavy freezing rain',
+      71:'🌨️:Light snow', 73:'❄️:Snow', 75:'❄️:Heavy snow', 77:'🌨️:Snow grains',
+      80:'🌦️:Showers', 81:'🌧️:Heavy showers', 82:'⛈️:Violent showers',
+      85:'🌨️:Snow showers', 86:'❄️:Heavy snow showers',
+      95:'⛈️:Thunderstorm', 96:'⛈️:Thunderstorm w/ hail', 99:'⛈️:Severe thunderstorm',
+    };
+    function wxInfo(code) {
+      const entry = WX[code] ?? WX[Math.floor((code ?? 0) / 10) * 10] ?? '🌡️:Current conditions';
+      const [icon, ...rest] = entry.split(':');
+      return { icon, desc: rest.join(':') };
+    }
+
+    /* ── DOM helpers ── */
+    const $ = id => document.getElementById(id);
+    function show(id) { $(id).classList.remove('hidden'); }
+    function hide(id) { $(id).classList.add('hidden'); }
+
+    function setLoadingState(msg) {
+      $('loading-msg').textContent = msg || 'Loading…';
+      show('loading-state');
+      hide('error-state');
+      hide('weather-widget');
+      hide('rec-card');
+      hide('refine-card');
+    }
+
+    function showError(title, body) {
+      hide('loading-state');
+      $('err-title').textContent = title  || 'Location unavailable';
+      $('err-body').textContent  = body   || 'Allow location access or enter details below.';
+      show('error-state');
+    }
+
+    function renderResult(data) {
+      hide('loading-state');
+      hide('error-state');
+
+      /* Weather widget */
+      const { icon, desc } = wxInfo(data.weather_code);
+      $('w-icon').textContent = icon;
+      $('w-temp').textContent = data.temp_c != null ? `${Math.round(data.temp_c * 10) / 10}°C` : '—';
+      $('w-desc').textContent = desc;
+      show('weather-widget');
+
+      /* Rec card */
+      const n = data.layers_recommended;
+      $('r-layers').textContent = n;
+      $('r-unit').innerHTML     = `layer${n === 1 ? '' : 's'}<br>recommended`;
+      $('r-type').textContent   = data.outfit_type;
+      $('r-notes').innerHTML    = data.notes.map(t =>
+        `<div class="note-item"><span class="note-dot"></span><span>${t}</span></div>`
+      ).join('');
+
+      const rc = $('rec-card');
+      rc.classList.remove('refreshing');
+      show('rec-card');
+      show('refine-card');
+    }
+
+    /* ── Fetch recommendation ── */
+    async function fetchRec() {
+      const payload = { occasion: S.occasion, sex: S.sex };
+
+      if (S.lat != null && S.lon != null) {
+        payload.location = { latitude: S.lat, longitude: S.lon };
+      } else if (S.manual_temp != null) {
+        payload.manual_temp_c   = S.manual_temp;
+        if (S.manual_cond) payload.manual_condition = S.manual_cond;
+      } else {
+        showError();
+        return;
+      }
+
+      /* If rec card is already showing, just dim it (soft refresh) */
+      const rc = $('rec-card');
+      if (!rc.classList.contains('hidden')) {
+        rc.classList.add('refreshing');
+        hide('loading-state');
+      } else {
+        setLoadingState('Getting your fit…');
+      }
+
+      try {
+        const res  = await fetch('/api/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Request failed');
+        renderResult(data);
+      } catch (e) {
+        showError('Something went wrong', e.message || 'Could not get a recommendation.');
+      }
+    }
+
+    /* ── Manual submit ── */
+    function fetchManual() {
+      const temp = parseFloat($('m-temp').value);
+      if (isNaN(temp)) { $('m-temp').focus(); return; }
+      S.lat = null; S.lon = null;
+      S.manual_temp = temp;
+      S.manual_cond = $('m-cond').value;
+      fetchRec();
+    }
+    $('m-temp').addEventListener('keydown', e => { if (e.key === 'Enter') fetchManual(); });
+
+    /* ── Chip selection ── */
+    function setChip(group, el) {
+      const groupId = group === 'occasion' ? 'occasion-chips' : 'gender-chips';
+      $( groupId ).querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      if (group === 'occasion') S.occasion = el.dataset.val;
+      else                      S.sex      = el.dataset.val;
+      fetchRec();
+    }
+
+    /* ── Boot: geolocation ── */
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!navigator.geolocation) { showError(); return; }
+      setLoadingState('Detecting your location…');
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          S.lat = pos.coords.latitude;
+          S.lon = pos.coords.longitude;
+          fetchRec();
+        },
+        () => showError(),
+        { timeout: 9000, maximumAge: 300000 }
+      );
+    });
+  </script>
+</body>
+</html>
