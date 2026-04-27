@@ -3,8 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Layora - Dress for Today</title>
-  <meta name="description" content="Real-time outfit recommendations based on the weather at your location.">
+  <title>Layora — Dress smart for today's weather</title>
+  <meta name="description" content="Real-time outfit recommendations based on your location's weather. Free, instant, no sign-up needed.">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="Layora — Know exactly what to wear today">
+  <meta property="og:description" content="Stop guessing. Layora reads real-time weather at your exact location and tells you the perfect outfit instantly — layers, style, occasion. Free, no sign-up.">
+  <meta property="og:url"         content="https://layora.app">
+  <meta property="og:site_name"   content="Layora">
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="Layora — Know exactly what to wear today">
+  <meta name="twitter:description" content="Stop guessing. Layora reads real-time weather and tells you the perfect outfit instantly — free, no sign-up.">
+
   <link href="/static/style.css" rel="stylesheet">
 </head>
 <body>
@@ -13,7 +26,7 @@
   <nav class="nav">
     <a href="/" class="nav-logo">Layora</a>
     <div class="nav-actions">
-      <a href="/about" class="nav-link">About</a>
+      <a href="/about" class="nav-link">How it Works</a>
     </div>
   </nav>
 
@@ -72,6 +85,7 @@
         <span class="rec-badge" id="r-type">—</span>
       </div>
       <div id="r-notes"></div>
+      <div class="avatar-wrap" id="avatar-wrap"></div>
     </div>
 
     <!-- Refine section -->
@@ -100,17 +114,39 @@
       </div>
     </div>
 
+    <!-- Share card -->
+    <div id="share-card" class="glass share-card hidden anim-fade-up d3">
+      <div class="share-title">Share this outfit recommendation</div>
+      <div class="share-url-row">
+        <input type="text" id="share-url" readonly>
+        <button class="btn-copy" id="copy-btn" onclick="copyShareUrl()">Copy link</button>
+      </div>
+    </div>
+
   </main>
 
-  <footer class="app-footer">
-    <div class="footer-links">
-      <a href="/about">About Layora</a>
-      <a href="/docs">API Docs</a>
+  <!-- ── Footer ── -->
+  <footer class="lp-footer">
+    <div class="lp-footer-inner">
+      <div class="lp-footer-top">
+        <a href="/" class="lp-footer-logo">Layora</a>
+        <div class="lp-footer-links">
+          <a href="/about">How it works</a>
+          <a href="/docs">API Docs</a>
+        </div>
+      </div>
+      <div class="lp-footer-bottom">
+        <div class="lp-footer-credit">
+          Built with ♥ by <a href="https://github.com/jovialgeorge">Jovial</a>
+          &nbsp;·&nbsp;
+          <span id="yr"></span> Layora
+        </div>
+        <div class="lp-footer-tagline">
+          <span style="color:var(--accent);">●</span>
+          Powered by Open-Meteo
+        </div>
+      </div>
     </div>
-    <p class="footer-credit">
-      Built with ♥ by <a href="https://github.com/jovialgeorge">Jovial</a>
-      &nbsp;·&nbsp; <span id="yr"></span>
-    </p>
   </footer>
 
   <script>
@@ -179,10 +215,230 @@
         `<div class="note-item"><span class="note-dot"></span><span>${t}</span></div>`
       ).join('');
 
+      renderAvatar(data.layers_recommended, data.outfit_type, data.temp_c);
+
       const rc = $('rec-card');
       rc.classList.remove('refreshing');
       show('rec-card');
       show('refine-card');
+
+      /* Share card */
+      $('share-url').value = buildShareUrl(data);
+      show('share-card');
+    }
+
+    /* ── Share URL helpers ── */
+    function wxCodeToCond(code) {
+      if (code == null) return 'clear';
+      const c = parseInt(code);
+      if ([71,73,75,77,85,86].includes(c)) return 'snow';
+      if ([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(c)) return 'rain';
+      if ([45,48,2,3].includes(c)) return 'cloudy';
+      return 'clear';
+    }
+
+    function buildShareUrl(data) {
+      const params = new URLSearchParams({
+        temp: Math.round(data.temp_c * 10) / 10,
+        cond: wxCodeToCond(data.weather_code),
+        occasion: S.occasion,
+        sex: S.sex,
+      });
+      return `${location.origin}${location.pathname}?${params}`;
+    }
+
+    async function copyShareUrl() {
+      const url = $('share-url').value;
+      const btn = $('copy-btn');
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+        $('share-url').select();
+      }
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
+    }
+
+    /* ── Avatar state machine ── */
+    let avTimer = null;
+    function startAvatarStateMachine() {
+      if (avTimer) clearTimeout(avTimer);
+      const svg = document.querySelector('#avatar-wrap .avatar-svg');
+      if (!svg) return;
+      const seq = [
+        { cls:'av-walking', dur:3400 },
+        { cls:'av-idle',    dur:2200 },
+        { cls:'av-action',  dur:2200 },
+        { cls:'av-idle',    dur:1000 },
+      ];
+      let i = 0;
+      function step() {
+        svg.classList.remove('av-walking','av-idle','av-action');
+        svg.classList.add(seq[i].cls);
+        avTimer = setTimeout(() => { i = (i + 1) % seq.length; step(); }, seq[i].dur);
+      }
+      step();
+    }
+
+    function renderAvatar(layers, outfitType, tempC) {
+      const wrap = $('avatar-wrap');
+      const sex = S.sex || 'other';
+
+      const PALETTE = {
+        'Casual':            { c1:'#6c63ff', c2:'#9d4edd', shoe:'#12112a' },
+        'Formal / Business': { c1:'#4a73e8', c2:'#2a5acc', shoe:'#1a0d00' },
+        'Athletic / Sport':  { c1:'#43e97b', c2:'#38f9d7', shoe:'#d8d8e8' },
+        'Party / Night Out': { c1:'#f093fb', c2:'#f5576c', shoe:'#1a0d00' },
+      };
+      const { c1, c2, shoe: shoeColor } = PALETTE[outfitType] || PALETTE['Casual'];
+
+      const isHot    = tempC != null ? tempC >= 25 : layers <= 1;
+      const isCold   = layers >= 3;
+      const isSport  = outfitType === 'Athletic / Sport';
+      const isFormal = outfitType === 'Formal / Business';
+      const showCoat  = layers >= 2;
+      const showScarf = layers >= 3;
+      const useShorts = isHot || isSport;
+
+      const pantColor = isFormal ? '#1e2a4a' : (useShorts ? '#3a3070' : '#1e1a38');
+      const shinColor = useShorts ? 'url(#avSkin)' : pantColor;
+      const thighH    = useShorts ? 20 : 30;
+      const kneeY     = 96 + thighH;
+      const shoeTopY  = kneeY + 30;
+
+      const mkShoe = (sx) => {
+        if (useShorts) return `<rect x="${sx}" y="${shoeTopY+2}" width="24" height="6" rx="3" fill="${shoeColor}"/>`;
+        if (isCold)   return `<rect x="${sx}" y="${shoeTopY-8}" width="24" height="14" rx="6" fill="${shoeColor}"/>`;
+        return `<rect x="${sx}" y="${shoeTopY+1}" width="24" height="9" rx="5" fill="${shoeColor}"/>`;
+      };
+
+      const sl = sex.toLowerCase();
+      let hairBack = '', hairFront = '';
+      if (sl === 'female' || sl === 'f') {
+        hairBack  = `<ellipse cx="50" cy="15" rx="18" ry="14" fill="#2a2245"/>`;
+        hairFront = `
+          <ellipse cx="50" cy="10" rx="17" ry="12" fill="#2a2245"/>
+          <rect x="32" y="17" width="7" height="26" rx="3.5" fill="#2a2245"/>
+          <rect x="61" y="17" width="7" height="26" rx="3.5" fill="#2a2245"/>`;
+      } else if (sl === 'male' || sl === 'm') {
+        hairFront = `<ellipse cx="50" cy="10" rx="16" ry="9" fill="#2a2245"/>`;
+      } else {
+        hairFront = `
+          <ellipse cx="50" cy="10" rx="16" ry="10" fill="#2a2245"/>
+          <rect x="33" y="17" width="6" height="18" rx="3" fill="#2a2245"/>
+          <rect x="61" y="17" width="6" height="18" rx="3" fill="#2a2245"/>`;
+      }
+
+      const tie = isFormal ? `
+        <path d="M 44 47 L 50 56 L 56 47" fill="rgba(255,255,255,0.88)"/>
+        <polygon points="50,57 47.5,66 50,78 52.5,66" fill="${c1}"/>` : '';
+
+      const headband = isSport
+        ? `<rect x="33" y="28" width="34" height="6" rx="3" fill="${c2}" opacity="0.72"/>` : '';
+
+      const hint = isHot  ? '☀️ Light &amp; breezy'
+                 : isCold ? '🧣 Fully layered'
+                 : layers === 2 ? '🧥 Two layers' : '👕 One layer';
+
+      wrap.innerHTML = `
+        <div class="avatar-label">Style preview</div>
+        <div class="avatar-figure">
+          <svg class="avatar-svg" viewBox="0 0 100 185" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="avG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="${c1}"/><stop offset="100%" stop-color="${c2}"/>
+              </linearGradient>
+              <linearGradient id="avSkin" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#e8bc7e"/><stop offset="100%" stop-color="#c38850"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Ground shadow (fixed, outside body group) -->
+            <ellipse cx="50" cy="181" rx="24" ry="4" fill="rgba(0,0,0,0.22)"/>
+
+            <g class="av-body-group">
+
+              ${hairBack}
+
+              <!-- LEFT LEG: thigh pivots at hip (50% 0% of group bounding box) -->
+              <g class="av-thigh-l">
+                <rect x="33" y="96" width="14" height="${thighH}" rx="6" fill="${pantColor}"/>
+                <!-- calf pivots at knee (50% 0% of calf group bounding box) -->
+                <g class="av-calf-l">
+                  <rect x="34" y="${kneeY}" width="12" height="30" rx="5" fill="${shinColor}"/>
+                  ${mkShoe(28)}
+                </g>
+              </g>
+
+              <!-- RIGHT LEG -->
+              <g class="av-thigh-r">
+                <rect x="53" y="96" width="14" height="${thighH}" rx="6" fill="${pantColor}"/>
+                <g class="av-calf-r">
+                  <rect x="54" y="${kneeY}" width="12" height="30" rx="5" fill="${shinColor}"/>
+                  ${mkShoe(48)}
+                </g>
+              </g>
+
+              <!-- Waistband -->
+              <rect x="28" y="90" width="44" height="10" rx="5" fill="${pantColor}"/>
+
+              <!-- LEFT ARM behind torso: arm pivots at shoulder, fgm pivots at elbow -->
+              <g class="av-arm-l">
+                <rect x="21" y="44" width="14" height="27" rx="6" fill="url(#avG)"/>
+                <g class="av-fgm-l">
+                  <rect x="22" y="71" width="12" height="22" rx="5" fill="url(#avSkin)"/>
+                  <ellipse cx="28" cy="96" rx="7" ry="5" fill="url(#avSkin)"/>
+                </g>
+              </g>
+
+              <!-- TORSO -->
+              <rect x="28" y="42" width="44" height="52" rx="9" fill="url(#avG)"/>
+
+              ${showCoat ? `
+                <rect x="21" y="39" width="58" height="57" rx="13"
+                      fill="none" stroke="${c1}" stroke-width="3" opacity="0.38"/>
+                <line x1="50" y1="44" x2="50" y2="95"
+                      stroke="rgba(255,255,255,0.1)" stroke-width="2"/>` : ''}
+
+              ${tie}
+
+              <!-- RIGHT ARM in front of torso -->
+              <g class="av-arm-r">
+                <rect x="65" y="44" width="14" height="27" rx="6" fill="url(#avG)"/>
+                <g class="av-fgm-r">
+                  <rect x="66" y="71" width="12" height="22" rx="5" fill="url(#avSkin)"/>
+                  <ellipse cx="72" cy="96" rx="7" ry="5" fill="url(#avSkin)"/>
+                </g>
+              </g>
+
+              ${showScarf ? `<rect x="30" y="34" width="40" height="11" rx="5.5" fill="${c2}" opacity="0.9"/>` : ''}
+
+              <!-- Neck -->
+              <rect x="43" y="35" width="14" height="12" rx="4" fill="url(#avSkin)"/>
+
+              <!-- HEAD GROUP — tilts during action state -->
+              <g class="av-head-group">
+                <circle cx="50" cy="22" r="17" fill="url(#avSkin)"/>
+                ${hairFront}
+                ${headband}
+                <circle cx="43.5" cy="21" r="2.4" fill="#1e1428"/>
+                <circle cx="56.5" cy="21" r="2.4" fill="#1e1428"/>
+                <circle cx="42.7" cy="20.2" r="0.9" fill="rgba(255,255,255,0.72)"/>
+                <circle cx="55.7" cy="20.2" r="0.9" fill="rgba(255,255,255,0.72)"/>
+                <path d="M 49 25 Q 50 28 51 25" stroke="rgba(150,85,25,0.4)"
+                      stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                <path d="M 45.5 28.5 Q 50 33 54.5 28.5"
+                      stroke="#1e1428" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+              </g>
+
+            </g>
+          </svg>
+        </div>
+        <div class="avatar-hint">${hint}</div>
+      `;
+
+      startAvatarStateMachine();
     }
 
     /* ── Fetch recommendation ── */
@@ -243,8 +499,40 @@
       fetchRec();
     }
 
-    /* ── Boot: geolocation ── */
+    /* ── Boot: check for shared URL params, otherwise geolocation ── */
     window.addEventListener('DOMContentLoaded', () => {
+      const p = new URLSearchParams(location.search);
+      const sharedTemp     = p.get('temp');
+      const sharedCond     = p.get('cond');
+      const sharedOccasion = p.get('occasion');
+      const sharedSex      = p.get('sex');
+
+      if (sharedOccasion) {
+        const chip = document.querySelector(`#occasion-chips [data-val="${sharedOccasion}"]`);
+        if (chip) {
+          document.querySelectorAll('#occasion-chips .chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          S.occasion = sharedOccasion;
+        }
+      }
+      if (sharedSex) {
+        const chip = document.querySelector(`#gender-chips [data-val="${sharedSex}"]`);
+        if (chip) {
+          document.querySelectorAll('#gender-chips .chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          S.sex = sharedSex;
+        }
+      }
+
+      if (sharedTemp !== null && !isNaN(parseFloat(sharedTemp))) {
+        S.manual_temp = parseFloat(sharedTemp);
+        S.manual_cond = sharedCond || 'clear';
+        $('m-temp').value = S.manual_temp;
+        $('m-cond').value = S.manual_cond;
+        fetchRec();
+        return;
+      }
+
       if (!navigator.geolocation) { showError(); return; }
       setLoadingState('Detecting your location…');
       navigator.geolocation.getCurrentPosition(

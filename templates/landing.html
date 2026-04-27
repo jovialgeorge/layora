@@ -3,8 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Layora - What to wear, decided in seconds.</title>
-  <meta name="description" content="Layora gives you real-time outfit recommendations based on the weather at your location. Dress smarter every day.">
+  <title>Layora — Know exactly what to wear today</title>
+  <meta name="description" content="Real-time outfit recommendations based on your location's weather. Free, instant, no sign-up. Open Layora and know what to wear in seconds.">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="Layora — Know exactly what to wear today">
+  <meta property="og:description" content="Stop guessing. Layora reads real-time weather at your exact location and tells you the perfect outfit instantly — layers, style, occasion. Free, no sign-up.">
+  <meta property="og:url"         content="https://layora.app/about">
+  <meta property="og:site_name"   content="Layora">
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="Layora — Know exactly what to wear today">
+  <meta name="twitter:description" content="Stop guessing. Layora reads real-time weather and tells you the perfect outfit instantly — free, no sign-up needed.">
+
   <link href="/static/style.css" rel="stylesheet">
 </head>
 <body>
@@ -14,8 +27,7 @@
   <nav class="nav">
     <a href="/about" class="nav-logo">Layora</a>
     <div class="nav-actions">
-      <a href="/" class="nav-link">Open App</a>
-      <a href="/" class="nav-cta">Try it free →</a>
+      <a href="/" class="nav-cta">Try it for free →</a>
     </div>
   </nav>
 
@@ -34,7 +46,7 @@
 
     <p class="lp-sub anim-fade-up d2">
       Layora reads real-time weather at your exact location and tells you exactly how to dress -
-      the right layers, the right look, for any occasion.
+      the right layers, the right look for your right occasion.
     </p>
 
     <div class="lp-cta-row anim-fade-up d3">
@@ -45,6 +57,7 @@
     <!-- Floating app preview -->
     <div class="lp-preview anim-scale-in d4">
       <div class="lp-preview-inner">
+        <div class="preview-sample-tag">Sample · not a real recommendation</div>
         <div class="lp-preview-row">
           <span style="font-size:2.8rem;">🌤️</span>
           <div>
@@ -87,7 +100,7 @@
         <span class="feature-icon">🧠</span>
         <h3>Smart layering logic</h3>
         <p>
-          Our recommendation engine maps temperature, precipitation, and conditions
+          Our recommendation engine maps temperature, precipitation and conditions
           to a practical layering guide - no fluff, just what to wear.
         </p>
       </div>
@@ -95,7 +108,7 @@
         <span class="feature-icon">🎨</span>
         <h3>Personalized to you</h3>
         <p>
-          Refine by occasion - casual, formal, sport, or party - and style preference
+          Refine by occasion - casual, formal, sport or party - and style preference
           to get suggestions that actually match your day.
         </p>
       </div>
@@ -111,7 +124,7 @@
         <span class="feature-icon">🔒</span>
         <h3>Privacy first</h3>
         <p>
-          Your location is only used to fetch weather. It's never stored, logged,
+          Your location is only used to fetch weather. It's never stored, logged
           or shared. You can also enter temperature manually.
         </p>
       </div>
@@ -140,8 +153,8 @@
         <div class="step-icon">📍</div>
         <h3>Share your location</h3>
         <p>
-          Allow one-time location access, or type in a temperature and condition manually.
-          No account needed.
+          Allow one-time location access or type in a temperature and condition manually.
+          No sign up or login needed.
         </p>
       </div>
       <div class="step anim-fade-up d2" style="border-left:1px solid var(--glass-border); border-right:1px solid var(--glass-border);">
@@ -149,7 +162,7 @@
         <div class="step-icon">🌦️</div>
         <h3>We read the weather</h3>
         <p>
-          Layora fetches current temperature, weather code, and conditions from a
+          Layora fetches current temperature, weather code and conditions from a
           live global forecast API.
         </p>
       </div>
@@ -158,9 +171,32 @@
         <div class="step-icon">👕</div>
         <h3>Get your outfit</h3>
         <p>
-          Receive a layering count, outfit type, and specific style notes - then
+          Receive a layering count, outfit type and specific style notes - then
           optionally refine by occasion or preference.
         </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Share section ── -->
+  <section class="lp-share-section">
+    <div class="glass lp-share-inner anim-fade-up">
+      <span class="lp-share-glyph">🔗</span>
+      <h2>Know someone who'd love this?</h2>
+      <p>Send them Layora — one click and they'll never wonder what to wear again.</p>
+      <div class="lp-share-btns">
+        <button class="share-btn share-btn-copy" id="lp-share-copy" onclick="shareLayora('copy')">
+          📋 Copy link
+        </button>
+        <button class="share-btn share-btn-x" onclick="shareLayora('x')">
+          𝕏 Share on X
+        </button>
+        <button class="share-btn share-btn-wa" onclick="shareLayora('whatsapp')">
+          💬 WhatsApp
+        </button>
+        <button class="share-btn share-btn-native" id="lp-share-native" onclick="shareLayora('native')" style="display:none">
+          ↗ Share
+        </button>
       </div>
     </div>
   </section>
@@ -169,10 +205,36 @@
   <section class="lp-cta-band">
     <div class="lp-cta-band-inner anim-scale-in">
       <h2>Ready to dress smarter?</h2>
-      <p>Open Layora, allow location access, and get your outfit in seconds.</p>
+      <p>Open Layora, allow location access and get your outfit in seconds.</p>
       <a href="/" class="btn-primary" style="font-size:1rem; padding:.95rem 2.25rem;">
         Open Layora - it's free →
       </a>
+    </div>
+  </section>
+
+  <!-- ── Feedback ── -->
+  <section class="feedback-section">
+    <div class="glass feedback-card anim-fade-up">
+      <div class="feedback-header">
+        <h2>Share your feedback</h2>
+        <p>Got a suggestion or ran into something? Let us know your valuable feedback.</p>
+      </div>
+
+      <div class="stars-row" id="stars-row" aria-label="Rating">
+        <button class="star-btn" data-v="1" onclick="setStar(1)" title="1 star">★</button>
+        <button class="star-btn" data-v="2" onclick="setStar(2)" title="2 stars">★</button>
+        <button class="star-btn" data-v="3" onclick="setStar(3)" title="3 stars">★</button>
+        <button class="star-btn" data-v="4" onclick="setStar(4)" title="4 stars">★</button>
+        <button class="star-btn" data-v="5" onclick="setStar(5)" title="5 stars">★</button>
+      </div>
+
+      <div class="feedback-fields">
+        <input type="text" id="fb-name" placeholder="Your name (optional)" maxlength="100">
+        <textarea id="fb-msg" placeholder="Your message (optional if you left a rating)" maxlength="2000"></textarea>
+      </div>
+
+      <button class="btn-primary" onclick="submitFeedback()">Send feedback →</button>
+      <div class="feedback-status" id="fb-status"></div>
     </div>
   </section>
 
@@ -180,7 +242,7 @@
   <footer class="lp-footer">
     <div class="lp-footer-inner">
       <div class="lp-footer-top">
-        <a href="/about" class="lp-footer-logo">Layora</a>
+        <a href="/" class="lp-footer-logo">Layora</a>
         <div class="lp-footer-links">
           <a href="/">Open App</a>
           <a href="/docs">API Docs</a>
@@ -204,6 +266,139 @@
   <script>
     document.getElementById('yr').textContent = new Date().getFullYear() + ' ©';
 
+    /* ── Share Layora ── */
+    if (navigator.share) document.getElementById('lp-share-native').style.display = '';
+
+    function shareLayora(method) {
+      const url  = window.location.origin;
+      const text = 'Check out Layora — it tells you exactly what to wear based on real-time weather at your location!';
+      if (method === 'copy') {
+        navigator.clipboard.writeText(url).then(() => {
+          const btn = document.getElementById('lp-share-copy');
+          btn.textContent = '✓ Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.innerHTML = '📋 Copy link'; btn.classList.remove('copied'); }, 2200);
+        }).catch(() => prompt('Copy this link:', url));
+      } else if (method === 'x') {
+        window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
+      } else if (method === 'whatsapp') {
+        window.open('https://wa.me/?text=' + encodeURIComponent(text + '\n' + url), '_blank');
+      } else if (method === 'native') {
+        navigator.share({ title: 'Layora — Dress smart for today\'s weather', text, url }).catch(() => {});
+      }
+    }
+
+    /* ── Star rating ── */
+    let selectedStar = null;
+    function setStar(v) {
+      selectedStar = v;
+      document.querySelectorAll('.star-btn').forEach(b => {
+        b.classList.toggle('lit', parseInt(b.dataset.v) <= v);
+      });
+      if (v === 5) launchFireworks();
+    }
+
+    /* ── Fireworks ── */
+    function launchFireworks() {
+      const canvas = document.getElementById('fw-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.display = 'block';
+
+      const COLORS = ['#6c63ff','#9d4edd','#f093fb','#43e97b','#f5576c','#ffd700','#38f9d7','#ff9f43'];
+      const particles = [];
+
+      const bursts = [
+        { x: canvas.width * 0.2,  y: canvas.height * 0.22 },
+        { x: canvas.width * 0.5,  y: canvas.height * 0.12 },
+        { x: canvas.width * 0.8,  y: canvas.height * 0.2  },
+        { x: canvas.width * 0.35, y: canvas.height * 0.42 },
+        { x: canvas.width * 0.65, y: canvas.height * 0.35 },
+        { x: canvas.width * 0.5,  y: canvas.height * 0.55 },
+      ];
+
+      bursts.forEach((b, i) => {
+        const color = COLORS[i % COLORS.length];
+        for (let j = 0; j < 42; j++) {
+          const angle = (j / 42) * Math.PI * 2;
+          const speed = 3.5 + Math.random() * 5.5;
+          particles.push({
+            x: b.x, y: b.y,
+            vx: Math.cos(angle) * speed * (0.7 + Math.random() * 0.6),
+            vy: Math.sin(angle) * speed * (0.7 + Math.random() * 0.6) - 2,
+            color,
+            alpha: 1,
+            r: 2.5 + Math.random() * 3.5,
+            gravity: 0.09 + Math.random() * 0.06,
+            decay: 0.013 + Math.random() * 0.006,
+          });
+        }
+      });
+
+      function tick() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        for (const p of particles) {
+          if (p.alpha <= 0) continue;
+          alive = true;
+          p.x  += p.vx;
+          p.y  += p.vy;
+          p.vy += p.gravity;
+          p.vx *= 0.97;
+          p.alpha -= p.decay;
+          p.r = Math.max(0.3, p.r * 0.986);
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.alpha);
+          ctx.fillStyle   = p.color;
+          ctx.shadowBlur  = 8;
+          ctx.shadowColor = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        if (alive) requestAnimationFrame(tick);
+        else { ctx.clearRect(0, 0, canvas.width, canvas.height); canvas.style.display = 'none'; }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    /* ── Feedback submit ── */
+    async function submitFeedback() {
+      const msg    = document.getElementById('fb-msg').value.trim();
+      const name   = document.getElementById('fb-name').value.trim();
+      const status = document.getElementById('fb-status');
+
+      if (!msg && selectedStar === null) {
+        status.textContent = 'Please leave a rating or a message before sending.';
+        status.className   = 'feedback-status err';
+        return;
+      }
+
+      status.textContent = 'Sending…';
+      status.className   = 'feedback-status';
+
+      try {
+        const res  = await fetch('/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rating: selectedStar, message: msg, name })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        status.textContent = '✓ Thanks! Your feedback was sent.';
+        status.className   = 'feedback-status ok';
+        document.getElementById('fb-msg').value  = '';
+        document.getElementById('fb-name').value = '';
+        selectedStar = null;
+        document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('lit'));
+      } catch (e) {
+        status.textContent = '✗ ' + (e.message || 'Could not send. Try again.');
+        status.className   = 'feedback-status err';
+      }
+    }
+
     /* Simple scroll-triggered reveal */
     const observer = new IntersectionObserver(entries => {
       entries.forEach(e => {
@@ -219,5 +414,6 @@
       observer.observe(el);
     });
   </script>
+  <canvas id="fw-canvas" style="display:none;position:fixed;inset:0;z-index:9999;pointer-events:none;"></canvas>
 </body>
 </html>

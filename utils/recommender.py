@@ -17,8 +17,8 @@ def recommend_outfit(temp_c, weather_code=None, sex='other', age=None, occasion=
 
     # Determine base layers from temperature
     if temp_c >= 25:
-        layers = 0
-        desc.append('Light clothing (t-shirt/shorts or single layer)')
+        layers = 1
+        desc.append('Light clothing — t-shirt or shorts, stay cool')
     elif 15 <= temp_c < 25:
         layers = 1
         desc.append('Light layer (long-sleeve or light jacket)')
@@ -64,8 +64,8 @@ def recommend_outfit(temp_c, weather_code=None, sex='other', age=None, occasion=
     else:
         desc.append('Casual and comfortable clothing')
 
-    # Cap layers to a reasonable range
-    layers = max(0, min(layers, 5))
+    # Cap layers to a reasonable range (minimum 1 — always wear something)
+    layers = max(1, min(layers, 5))
 
     return {
         'temp_c': temp_c,

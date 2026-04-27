@@ -1,9 +1,15 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 from flask_restx import Api, Resource, fields
+from dotenv import load_dotenv
 import requests
 import logging
 import sys
+import os
+import smtplib
+from email.mime.text import MIMEText
 from utils.recommender import recommend_outfit
+
+load_dotenv()
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 api = Api(app, version='1.0', title='Fit Recommender API', doc='/docs', prefix='/api')
@@ -94,6 +100,70 @@ def index():
 @app.route('/about')
 def about():
     return render_template('landing.html')
+
+
+MAIL_TO   = 'jovialdevit@gmail.com'
+MAIL_FROM = os.environ.get('MAIL_USER', '')
+MAIL_PASS = os.environ.get('MAIL_PASS', '')
+
+
+def _send_mail(subject, body):
+    if not MAIL_FROM or not MAIL_PASS:
+        app.logger.warning('Mail not configured (set MAIL_USER and MAIL_PASS env vars)')
+        return False
+    msg = MIMEText(body, 'plain', 'utf-8')
+    msg['Subject'] = subject
+    msg['From']    = MAIL_FROM
+    msg['To']      = MAIL_TO
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=8) as s:
+        s.login(MAIL_FROM, MAIL_PASS)
+        s.sendmail(MAIL_FROM, [MAIL_TO], msg.as_string())
+    return True
+
+
+@app.route('/feedback', methods=['POST'])
+def feedback():
+    try:
+        data    = request.get_json(silent=True) or {}
+        rating  = data.get('rating')
+        message = str(data.get('message', '')).strip()[:2000]
+        name    = str(data.get('name', '')).strip()[:100]
+
+        if not message and rating is None:
+            return jsonify({'error': 'Nothing to send'}), 400
+
+        try:
+            rating_int = int(rating) if rating is not None else None
+        except (ValueError, TypeError):
+            rating_int = None
+
+        stars  = ('★' * rating_int + '☆' * (5 - rating_int)) if rating_int else 'Not rated'
+        sender = name or 'Anonymous'
+        body   = f"Layora Feedback\n{'─'*30}\nFrom:    {sender}\nRating:  {stars} ({rating_int}/5)\n\n{message or '(no message)'}"
+
+        try:
+            sent = _send_mail(f'[Layora Feedback] {stars} from {sender}', body)
+        except Exception as e:
+            app.logger.error('Feedback mail error: %s', e)
+            return jsonify({'error': 'Could not send email. Check MAIL_USER / MAIL_PASS.'}), 500
+
+        if not sent:
+            app.logger.info('Feedback (mail not configured): %s', body)
+
+        return jsonify({'ok': True})
+    except Exception as e:
+        app.logger.error('Unexpected feedback error: %s', e)
+        return jsonify({'error': 'Unexpected server error.'}), 500
+
+
+@app.errorhandler(404)
+def not_found(_):
+    return jsonify({'error': 'Not found'}), 404
+
+
+@app.errorhandler(500)
+def server_error(_):
+    return jsonify({'error': 'Internal server error'}), 500
 
 
 def log_registered_routes():
